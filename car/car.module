@@ -72,7 +72,7 @@ function car_menu(){
 		'description' => t('List of available cars.'),
 		'page callback' => '_page_cars',
 		'access arguments' => array('access content'),
-		'type' => MENU_DEFAULT_LOCAL_TASK,
+		'type' => MENU_CALLBACK,
 	);
 
 	$menus['car/%'] = array(
@@ -81,7 +81,7 @@ function car_menu(){
 		'page callback' => '_page_car_details',
 		'page arguments' => array(1),
 		'access arguments' => array('access content'),
-		'type' => MENU_LOCAL_TASK,
+		'type' => MENU_CALLBACK,
 	);
 
 	return $menus;
@@ -227,6 +227,7 @@ function _page_cars() {
 		'#theme' => 'table',
 		'#header' => $header,
 		'#rows' => $rows,
+		'#empty' => 'There are no record in the list.',
 	);
 
 	return $output;
