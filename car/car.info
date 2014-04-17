@@ -1,0 +1,7 @@
+name = Car
+description = Car entity
+package = Automobile
+version = 0.1-dev
+core = 7.x
+files[] = car.module
+files[] = car.install

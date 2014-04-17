@@ -1,0 +1,295 @@
+<?php
+
+/**
+ * @file
+ * Car Module, Introduces car entity in the system
+ */
+
+/* ============== Hooks ============== */
+
+/**
+ * Implements hook_theme().
+ * 
+ * @return array An array of theme registry items provided by car module.
+ */
+function car_theme() {
+	$theme_hooks = array();
+
+	$theme_hooks['car_full_view'] = array(
+		'variables' => array('element' => NULL),
+		'template' => 'car'
+	);
+
+	return $theme_hooks;
+}
+
+/**
+ * Implements hook_entity_info().
+ *
+ * @return array An array containing information defining car entity from this module
+ */
+function car_entity_info() {
+	$car_entities = array();
+
+	$car_entities['car'] = array(
+		'label' => t('Car'),
+		'plural label' => t('Cars'),
+		'description' => t('Car entity to deal with automobile vechile data.'),
+		'base table' => 'car',
+		'entity class' => 'Car',
+		'controller class' => 'EntityAPIController',
+		'fieldable' => FALSE,
+		'module' => 'car',
+		'entity keys' => array(
+			'id' => 'car_id',
+			'label' => 'title',
+		),
+		'view modes' => array(
+			'full' => array(
+				'label' => t('Detailed view'),
+				'custom settings' => FALSE,
+			),
+		),
+		'uri callback' => 'entity_class_uri',
+		'access callback' => '_car_administer_access' ,
+		'admin ui' => array(
+			'path' => 'admin/structure/cars',
+			'controller class' => 'CarUIController',
+		),
+	);
+
+	return $car_entities;
+}
+
+/**
+ * Implements hook_menu().
+ */
+function car_menu(){
+	$menus = array();
+
+	$menus['car'] = array(
+		'title' => t('Cars'),
+		'description' => t('List of available cars.'),
+		'page callback' => '_page_cars',
+		'access arguments' => array('access content'),
+		'type' => MENU_DEFAULT_LOCAL_TASK,
+	);
+
+	$menus['car/%'] = array(
+		'title callback' => '_page_title_car',
+		'title arguments' => array(1),
+		'page callback' => '_page_car_details',
+		'page arguments' => array(1),
+		'access arguments' => array('access content'),
+		'type' => MENU_LOCAL_TASK,
+	);
+
+	return $menus;
+}
+
+/* ============== Callbacks ============== */
+
+/**
+ * Access callback for entity administer access interface.
+ */
+function _car_administer_access($op, $type=null, $account=null){
+	global $user;
+	if ($user->uid == 1 || user_access('administer', $account))
+		return TRUE;
+}
+
+/* ============== Form Definitions and submit handlers ============== */
+
+/**
+ * Entity car edit form
+ */
+function car_form($form, &$form_state) {
+	$form = array();
+
+	$car = $form_state['car'];
+	//debug($car);
+
+	$form['title'] = array(
+		'#title' => t('Title'),
+		'#type' => 'textfield',
+		'#description' => t('Title or car identifying information in 256 characters.'),
+		'#default_value' => $car->title,
+	);
+
+	$form['make'] = array(
+		'#title' => t('Car Make'),
+		'#type' => 'textfield',
+		'#description' => t('Name of the car manufecturer.'),
+		'#default_value' => $car->make,
+	);
+	
+	$form['model'] = array(
+		'#title' => t('Car Model'),
+		'#type' => 'textfield',
+		'#description' => t('Model information of the car.'),
+		'#default_value' => $car->model,
+	);
+	
+	$form['color'] = array(
+		'#title' => t('Color'),
+		'#type' => 'textfield',
+		'#description' => t('The color of the car. e.g. White, Black'),
+		'#default_value' => $car->color,
+	);
+	
+	$form['top_speed'] = array(
+		'#title' => t("Car's top speed"),
+		'#type' => 'textfield',
+		'#description' => t('Top speed of the car in MPH.'),
+		'#default_value' => $car->top_speed,
+	);
+	
+	$form['price'] = array(
+		'#title' => t("Price"),
+		'#type' => 'textfield',
+		'#default_value' => $car->price,
+	);
+
+	$form['actions'] = array(
+		'#type' => 'wrapper',
+	);
+
+	$form['actions']['submit'] = array(
+		'#type' => 'submit',
+		'#value' => t('Save'),
+	);
+
+	$form['actions']['cancel'] = array(
+		'#markup' => l('Cancel', 'admin/structure/cars'),
+	);
+
+	return $form;
+}
+
+/**
+ *
+ */
+function car_form_submit(&$form, &$form_state) {
+	$car = entity_ui_form_submit_build_entity($form, $form_state);
+	$car->save();
+	$form_state['redirect'] = 'admin/structure/cars';
+}
+
+
+/**
+ * Cars page callback
+ */
+function _page_cars() {
+	$header = array(
+		array(
+			'data' => t('Title'),
+			'field' => 'c.title'
+		),
+		array(
+			'data' => t('Make'),
+			'field' => 'c.make'
+		),
+		array(
+			'data' => t('Model'),
+			'field' => 'c.model'
+		),
+		array(
+			'data' => t('Color'),
+			'field' => 'c.color'
+		),
+		array(
+			'data' => t('Top Speed'),
+			'field' => 'c.top_speed'
+		),
+		array(
+			'data' => t('Price'),
+			'field' => 'c.price'
+		),
+	);
+
+	$query = db_select('car', 'c')->extend('TableSort');
+	$query->fields('c');
+	$result = $query->orderByHeader($header)->execute();
+
+	$rows = array();
+
+	foreach($result as $row) {
+		$id = $row->car_id;
+		unset($row->car_id);
+		$row_data = (array) $row;
+		$row_data['title'] = l($row_data['title'], 'car/'.$id);
+		$rows[] = array('data' => $row_data);
+	}
+
+	$output['cars_list'] = array(
+		'#theme' => 'table',
+		'#header' => $header,
+		'#rows' => $rows,
+	);
+
+	return $output;
+}
+
+/**
+ * Car details page callback
+ */
+function _page_car_details($car_id) {
+	$cars = entity_load('car', array($car_id));
+	$car = $cars[$car_id];
+	$car->title = filter_xss($car->title);
+
+	return array(
+    '#theme'     => 'car_full_view',
+    '#element'   => $car,
+    '#view_mode' => 'full',
+    '#language'  => LANGUAGE_NONE,
+	);
+}
+
+/**
+ *	Page title callback
+ */
+function _page_title_car($car_id) {
+	//$car = entity_load('car', array($car_id));
+	//$car = $car[$car_id];
+	//return $car->title;
+	return '';
+}
+
+/* ============== Classes ============== */
+
+
+/**
+ *	class CarUIController
+ */
+class CarUIController extends EntityDefaultUIController{
+	public function hook_menu(){
+		$items = parent::hook_menu();
+		$items[$this->path]['description'] = t('Manage Car Entries');
+		return $items;
+	}
+}
+
+/**
+ * class Car
+ */
+class Car extends Entity {
+	public $car_id;
+	public $title;
+	public $make;
+	public $model;
+	public $color;
+	public $top_speed;
+	public $price;
+
+	public function __construct($values = array()){
+		parent::__construct($values, 'car');
+	}
+
+	public function defaultUri(){
+		return array(
+			'path' => $this->entityType . "/" . $this->identifier(),
+			'options' => array('fragment' => $this->entityType . "-" . urlify_text(strtolower($this->title))),
+		);
+	}
+}

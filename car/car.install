@@ -1,0 +1,63 @@
+<?php
+
+/**
+ * @file
+ * car.install
+ */
+
+/**
+ * Implements hook_schema().
+ */
+function car_schema() {
+  $schema['car'] = array(
+  'description' => 'Base table for entity Car',
+    'fields' => array(
+      'car_id' => array(
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => "The car record id",
+      ),
+      'title' => array(
+        'type' => 'varchar',
+        'length' => 256,
+        'default' => NULL,
+        'description' => "The title of the car.",
+      ),
+      'make' => array(
+        'type' => 'varchar',
+        'length' => 128,
+        'default' => NULL,
+        'description' => "The maker of the car.",
+      ),
+      'model' => array(
+        'type' => 'varchar',
+        'length' => 128,
+        'default' => NULL,
+        'description' => "The model of the car.",
+      ),
+      'color' => array(
+        'type' => 'varchar',
+        'length' => 128,
+        'default' => NULL,
+        'description' => "The color of the car.",
+      ),
+      'top_speed' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => "Top speed of the car in MPH.",
+      ),
+      'price' => array(
+        'type' => 'float',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => "The price of the car.",
+      ),
+    ),
+    'primary key' => array('car_id'),
+  );
+
+  return $schema;
+}
