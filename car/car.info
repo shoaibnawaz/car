@@ -5,3 +5,5 @@ version = 0.1-dev
 core = 7.x
 files[] = car.module
 files[] = car.install
+
+dependencies[] = entity

@@ -16,11 +16,11 @@
 </div>
 <div class="row">
 	<span>Top speed:</span>
-	<span><?php print $element->top_speed; ?></span>
+	<span><?php print $element->top_speed; ?> MPH</span>
 </div>
 <div class="row">
 	<span>Price:</span>
-	<span><?php print $element->price; ?></span>
+	<span>$<?php print $element->price; ?></span>
 </div>
 
 <style>
