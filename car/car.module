@@ -16,7 +16,7 @@ function car_theme() {
 	$theme_hooks = array();
 
 	$theme_hooks['car_full_view'] = array(
-		'variables' => array('element' => NULL),
+		'variables' => array('element' => NULL, 'view_mode' => NULL),
 		'template' => 'car'
 	);
 
@@ -235,6 +235,7 @@ function _page_cars() {
  * Car details page callback
  */
 function _page_car_details($car_id) {
+	drupal_add_css(drupal_get_path('module', 'car') . '/style.css');
 	$cars = entity_load('car', array($car_id));
 	$car = $cars[$car_id];
 	$car->title = filter_xss($car->title);
@@ -243,7 +244,6 @@ function _page_car_details($car_id) {
     '#theme'     => 'car_full_view',
     '#element'   => $car,
     '#view_mode' => 'full',
-    '#language'  => LANGUAGE_NONE,
 	);
 }
 
