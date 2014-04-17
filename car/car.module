@@ -107,7 +107,6 @@ function car_form($form, &$form_state) {
 	$form = array();
 
 	$car = $form_state['car'];
-	//debug($car);
 
 	$form['title'] = array(
 		'#title' => t('Title'),
@@ -216,9 +215,11 @@ function _page_cars() {
 
 	foreach($result as $row) {
 		$id = $row->car_id;
+		$car = entity_load('car', array($id));
 		unset($row->car_id);
 		$row_data = (array) $row;
-		$row_data['title'] = l($row_data['title'], 'car/'.$id);
+		$uri = entity_uri('car', $car[$id]);
+		$row_data['title'] = l($row_data['title'], $uri['path'], $uri['options']);
 		$rows[] = array('data' => $row_data);
 	}
 
@@ -251,10 +252,9 @@ function _page_car_details($car_id) {
  *	Page title callback
  */
 function _page_title_car($car_id) {
-	//$car = entity_load('car', array($car_id));
-	//$car = $car[$car_id];
-	//return $car->title;
-	return '';
+	$car = entity_load('car', array($car_id));
+	$car = $car[$car_id];
+	return $car->title;
 }
 
 /* ============== Classes ============== */
@@ -266,6 +266,7 @@ function _page_title_car($car_id) {
 class CarUIController extends EntityDefaultUIController{
 	public function hook_menu(){
 		$items = parent::hook_menu();
+		$items[$this->path]['title'] = t('Cars');
 		$items[$this->path]['description'] = t('Manage Car Entries');
 		return $items;
 	}
@@ -290,7 +291,7 @@ class Car extends Entity {
 	public function defaultUri(){
 		return array(
 			'path' => $this->entityType . "/" . $this->identifier(),
-			'options' => array('fragment' => $this->entityType . "-" . urlify_text(strtolower($this->title))),
+			'options' => array('fragment' => $this->entityType . "-" . drupal_html_class($this->title)),
 		);
 	}
 }
