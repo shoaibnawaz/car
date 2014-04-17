@@ -1,0 +1,14 @@
+	.row > :first-child {
+		width: 30%;
+		float: left;
+		display: inline-block;
+		font-size: 1.2rem;
+		clear: left;
+	}
+
+	.row > :last-child {
+		width: 69%;
+		float: left;
+		display: inline-block;
+		font-size: 1.2rem;
+	}
